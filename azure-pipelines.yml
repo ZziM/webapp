@@ -44,7 +44,7 @@ steps:
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publishing WebApp artifact'
-  condition: successed()
+  condition: succeeded()
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)'
     artifact: 'webapp'
