@@ -37,7 +37,7 @@ steps:
     restoreKeys: |
       nuget | "$(Agent.OS)"
       nuget
-    path: $(BUILD_CONFIGURATION)
+    path: '$(BUILD_CONFIGURATION)'
     cacheHitVar: 'CACHE_RESTORED'
 
 - task: NuGetCommand@2
