@@ -24,6 +24,7 @@ steps:
   displayName: 'Checkout'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Check Format'
   inputs:
     command: 'custom'
     custom: 'format'
