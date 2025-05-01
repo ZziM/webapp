@@ -30,19 +30,19 @@ steps:
     custom: 'format'
     arguments: '--verify-no-changes'
 
-# - task: Cache@2
-#   displayName: 'NuGet Caching'
-#   inputs:
-#     key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
-#     restoreKeys: |
-#       nuget | "$(Agent.OS)"
-#       nuget
-#     path: $(BUILD_CONFIGURATION)
-#     cacheHitVar: 'CACHE_RESTORED'
+- task: Cache@2
+  displayName: 'NuGet Caching'
+  inputs:
+    key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
+    restoreKeys: |
+      nuget | "$(Agent.OS)"
+      nuget
+    path: $(BUILD_CONFIGURATION)
+    cacheHitVar: 'CACHE_RESTORED'
 
 - task: NuGetCommand@2
   displayName: 'NuGet Restore'
-  # condition: ne(variables.CACHE_RESTORED, true)
+  condition: ne(variables.CACHE_RESTORED, true)
   inputs:
     command: 'restore'
     restoreSolution: '**/*.sln'
