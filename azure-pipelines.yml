@@ -19,27 +19,32 @@ steps:
     version: 8.x
     performMultiLevelLookup: true
     
+- checkout: self
+  displayName: 'Checkout'
+
 - task: DotNetCoreCLI@2
+  displayName: 'Display project dependencies'
   inputs:
     command: restore
 
 - task: DotNetCoreCLI@2
+  displayName: 'Unit Tests'
   inputs:
     command: test
     projects: '**/*.UnitTests/*.csproj'
     arguments: '--configuration $(buildConfiguration) --collect "Code Coverage"'
-  displayName: 'Running Unit Tests'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Build & Deploy artifact'
   inputs:
     command: publish
     publishWebProjects: true
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    arguments: '--no-restore --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: true
-  displayName: 'Build & Deploy artifact'
 
 - task: PublishPipelineArtifact@1
+  displayName: 'Publishing WebApp artifact'
+  condition: successed()
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)'
     artifact: 'webapp'
-  displayName: 'Publishing WebApp artifact'
