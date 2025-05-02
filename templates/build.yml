@@ -40,7 +40,7 @@ steps:
     #arguments: '--configuration ${{ parameters.BUILD_CONFIGURATION }} /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/'
     arguments: >
       --no-build
-      --configuration ${{ parameters.BUILD_CONFIGURATION}}
+      --configuration ${{ parameters.BUILD_CONFIGURATION }}
       -- /p:CollectCoverage=true
       /p:CoverletOutputFormat=cobertura
       /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/
