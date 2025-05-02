@@ -11,13 +11,14 @@ pool:
 
 variables:
   BUILD_CONFIGURATION: 'Release'
+  DOTNET_SDK_VERSION: 8.x
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
 
 steps:
 - task: UseDotNet@2
   displayName: 'Install .NET Core SDK'
   inputs:
-    version: 8.x
+    version: $(DOTNET_SDK_VERSION)
     performMultiLevelLookup: true
     
 - checkout: self
@@ -30,43 +31,13 @@ steps:
     custom: 'format'
     arguments: '--verify-no-changes'
 
-- task: Cache@2
-  displayName: 'NuGet Caching'
-  inputs:
-    key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
-    restoreKeys: |
-      nuget | "$(Agent.OS)"
-      nuget
-    path: '$(NUGET_PACKAGES)'
-    cacheHitVar: 'CACHE_RESTORED'
-
-- script: dotnet clean --configuration $(BUILD_CONFIGURATION)
-  displayName: 'Clean previous build output'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Dotnet Restore'
-  condition: ne(variables.CACHE_RESTORED, true)
-  inputs:
-    command: restore
-    projects: '**/*.sln'
-  
-- task: DotNetCoreCLI@2
-  displayName: 'Unit Tests'
-  inputs:
-    command: test
-    projects: '**/*.UnitTests/*.csproj'
-    arguments: '--configuration $(BUILD_CONFIGURATION) --collect "Code Coverage"'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Build & Deploy artifact'
-  inputs:
-    command: publish
-    publishWebProjects: true
-    arguments: '--no-restore --configuration $(BUILD_CONFIGURATION) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: true
+- template: templates/build.yml
+  parameters:
+    BUILD_CONFIGURATION: '$(BUILD_CONFIGURATION)'
+    NUGET_PACKAGES: '$(NUGET_PACKAGES)'
 
 - task: PublishPipelineArtifact@1
-  displayName: 'Publishing WebApp artifact'
+  displayName: 'Publish Artifact: drop'
   condition: succeeded()
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)'
