@@ -399,3 +399,11 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Code Coverage
+TestResults/
+CodeCoverage/
+**/coverage*.xml
+
+# Coverlet output
+*.cobertura.xml

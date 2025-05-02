@@ -21,6 +21,13 @@ steps:
     version: $(DOTNET_SDK_VERSION)
     performMultiLevelLookup: true
     
+- task: DotNetCoreCLI@2
+  displayName: 'Install .NET tools from local manifest'
+  inputs:
+    command: 'custom'
+    custom: 'tool'
+    arguments: 'restore'
+
 - checkout: self
   displayName: 'Checkout'
 

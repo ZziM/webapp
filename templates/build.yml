@@ -22,15 +22,27 @@ steps:
   inputs:
     command: restore
     projects: '**/*.sln'
-  
+
 - task: DotNetCoreCLI@2
   displayName: 'Unit Tests'
   inputs:
     command: test
-    arguments: '--configuration $(BUILD_CONFIGURATION) --collect "Code Coverage"'
     publishTestResults: true
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
+    arguments: >
+      --no-build 
+      --configuration $(BUILD_CONFIGURATION)
+      /p:CollectCoverage=true 
+      /p:CoverletOutputFormat=cobertura 
+      /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/
+
+- task: DotNetCoreCLI@2
+  displayName: 'CodeCoverage Report'
+  inputs:
+    command: 'custom'
+    custom: 'tool'
+    arguments: 'reportgenerator -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/TestResults/Coverage/Report -reporttypes:HtmlInline_AzurePipelines'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build & Deploy artifact'
