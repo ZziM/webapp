@@ -15,9 +15,6 @@ steps:
     path: '$(NUGET_PACKAGES)'
     cacheHitVar: 'CACHE_RESTORED'
 
-- script: dotnet clean --configuration $(BUILD_CONFIGURATION)
-  displayName: 'Clean previous build output'
-
 - task: DotNetCoreCLI@2
   displayName: 'Dotnet Restore'
   condition: ne(variables.CACHE_RESTORED, true)
