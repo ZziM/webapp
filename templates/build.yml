@@ -2,6 +2,7 @@ parameters:
   BUILD_CONFIGURATION: 'Release'
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
 
+steps:
 - task: Cache@2
   displayName: 'NuGet Caching'
   inputs:
