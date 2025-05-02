@@ -37,21 +37,15 @@ steps:
     publishTestResults: true
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
-    #arguments: '--configuration ${{ parameters.BUILD_CONFIGURATION }} /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/'
-    arguments: >
-      --no-build
-      --configuration ${{ parameters.BUILD_CONFIGURATION }}
-      -- /p:CollectCoverage=true
-      /p:CoverletOutputFormat=cobertura
-      /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/
+    arguments: '--configuration ${{ parameters.BUILD_CONFIGURATION }} /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/'
 
 - task: DotNetCoreCLI@2
   displayName: 'CodeCoverage Report'
   inputs:
     command: 'custom'
     custom: 'tool'
-    arguments: |
-      run reportgenerator --
+    arguments: >
+      run reportgenerator
       -reports:${{ parameters.COVERAGE_DIR }}/coverage.cobertura.xml
       -targetdir:${{ parameters.COVERAGE_DIR }}/Report
       -reporttypes:HtmlInline_AzurePipelines
