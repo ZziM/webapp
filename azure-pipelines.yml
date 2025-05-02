@@ -1,8 +1,3 @@
-# ASP.NET Core
-# Build and test ASP.NET Core projects targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
 - master
 
@@ -10,31 +5,31 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  BUILD_CONFIGURATION: 'Release'
-  DOTNET_SDK_VERSION: 8.x
-  NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
-  COVERAGE_DIR: $(Build.SourcesDirectory)/TestResults/Coverage
-  ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
+  BuildConfiguration: 'Release'
+  DotNetSdkVersion: 8.x
+  NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
+  CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
+  ArtifactDir: $(Build.ArtifactStagingDirectory)
 
 steps:
 - task: UseDotNet@2
-  displayName: 'Install .NET Core SDK'
+  displayName: 'Install .NET SDK'
   inputs:
-    version: $(DOTNET_SDK_VERSION)
+    version: $(DotNetSdkVersion)
     performMultiLevelLookup: true
 
 - checkout: self
-  displayName: 'Checkout'
+  displayName: 'Checkout Repository'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Install .NET tools from local manifest'
+  displayName: 'Restore .NET Tools'
   inputs:
     command: 'custom'
     custom: 'tool'
     arguments: 'restore'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Check Format'
+  displayName: 'Verify Code Formatting'
   inputs:
     command: 'custom'
     custom: 'format'
@@ -42,14 +37,14 @@ steps:
 
 - template: templates/build.yml
   parameters:
-    BUILD_CONFIGURATION: '$(BUILD_CONFIGURATION)'
-    NUGET_PACKAGES: '$(NUGET_PACKAGES)'
-    COVERAGE_DIR: '$(Build.SourcesDirectory)/TestResults/Coverage'
-    ARTIFACT_DIR: '$(Build.ArtifactStagingDirectory)'
+    BuildConfiguration: '$(BuildConfiguration)'
+    NuGetPackages: '$(NuGetPackages)'
+    CoverageDir: '$(CoverageDir)'
+    ArtifactDir: '$(ArtifactDir)'
 
 - task: PublishPipelineArtifact@1
-  displayName: 'Publish Artifact: drop'
+  displayName: 'Publish Artifact: WebApp'
   condition: succeeded()
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    artifact: 'webapp'
+    targetPath: '$(ArtifactDir)'
+    artifact: 'WebAppArtifact'
