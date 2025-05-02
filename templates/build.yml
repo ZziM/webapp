@@ -2,7 +2,6 @@ parameters:
   BUILD_CONFIGURATION: 'Release'
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
 
-steps:
 - task: Cache@2
   displayName: 'NuGet Caching'
   inputs:
@@ -27,8 +26,10 @@ steps:
   displayName: 'Unit Tests'
   inputs:
     command: test
-    projects: '**/*.UnitTests/*.csproj'
     arguments: '--configuration $(BUILD_CONFIGURATION) --collect "Code Coverage"'
+    publishTestResults: true
+    testRunTitle: 'Unit Tests'
+    projects: '**/*.UnitTests/*.csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build & Deploy artifact'
