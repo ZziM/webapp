@@ -41,7 +41,7 @@ steps:
   inputs:
     command: 'custom'
     custom: 'tool'
-    arguments: 'reportgenerator -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/TestResults/Coverage/Report -reporttypes:HtmlInline_AzurePipelines'
+    arguments: 'run reportgenerator -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/TestResults/Coverage/Report -reporttypes:HtmlInline_AzurePipelines'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build & Deploy artifact'
