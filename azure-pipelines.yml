@@ -13,6 +13,8 @@ variables:
   BUILD_CONFIGURATION: 'Release'
   DOTNET_SDK_VERSION: 8.x
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+  COVERAGE_DIR: $(Build.SourcesDirectory)/TestResults/Coverage
+  ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
 
 steps:
 - task: UseDotNet@2
@@ -42,6 +44,8 @@ steps:
   parameters:
     BUILD_CONFIGURATION: '$(BUILD_CONFIGURATION)'
     NUGET_PACKAGES: '$(NUGET_PACKAGES)'
+    COVERAGE_DIR: '$(Build.SourcesDirectory)/TestResults/Coverage'
+    ARTIFACT_DIR: '$(Build.ArtifactStagingDirectory)'
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
