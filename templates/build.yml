@@ -12,7 +12,7 @@ steps:
     restoreKeys: |
       nuget | "$(Agent.OS)"
       nuget
-    path: '$(NUGET_PACKAGES)'
+    path: '${{ parameters.NUGET_PACKAGES }}'
     cacheHitVar: 'CACHE_RESTORED'
 
 - task: DotNetCoreCLI@2
@@ -28,7 +28,7 @@ steps:
     command: build
     projects: '**/*.sln'
     arguments: |
-      --configuration $(BUILD_CONFIGURATION)
+      --configuration ${{ parameters.BUILD_CONFIGURATION }}
 
 - task: DotNetCoreCLI@2
   displayName: 'Unit Tests'
@@ -38,10 +38,10 @@ steps:
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
     arguments: |
-      --no-build --configuration $(BUILD_CONFIGURATION)
+      --no-build --configuration ${{ parameters.BUILD_CONFIGURATION }}
       /p:CollectCoverage=true 
       /p:CoverletOutputFormat=cobertura 
-      /p:CoverletOutput=$(COVERAGE_DIR)/
+      /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/
 
 - task: DotNetCoreCLI@2
   displayName: 'CodeCoverage Report'
@@ -50,14 +50,15 @@ steps:
     custom: 'tool'
     arguments: |
       run reportgenerator --
-      -reports:$(COVERAGE_DIR)/coverage.cobertura.xml
-      -targetdir:$(COVERAGE_DIR)/Report
+      -reports:${{ parameters.COVERAGE_DIR }}/coverage.cobertura.xml
+      -targetdir:${{ parameters.COVERAGE_DIR }}/Report
       -reporttypes:HtmlInline_AzurePipelines
 
 - task: PublishCodeCoverageResults@2
   displayName: 'Publish Code Coverage Report'
   inputs:
-    summaryFileLocation: '$(COVERAGE_DIR)/coverage.cobertura.xml'
+    summaryFileLocation: '${{ parameters.COVERAGE_DIR }}/coverage.cobertura.xml'
+    reportDirectory: '${{ parameters.COVERAGE_DIR }}/Report'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build & Deploy artifact'
@@ -65,5 +66,5 @@ steps:
     command: publish
     publishWebProjects: true
     arguments: |
-      --no-restore --configuration $(BUILD_CONFIGURATION) --output $(ARTIFACT_DIR)
+      --no-restore --configuration ${{ parameters.BUILD_CONFIGURATION }} --output ${{ parameters.ARTIFACT_DIR }}
     zipAfterPublish: true
