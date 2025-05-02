@@ -33,7 +33,8 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Unit Tests'
   inputs:
-    command: test
+    command: custom
+    custom: test
     publishTestResults: true
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
@@ -42,7 +43,8 @@ steps:
       -- /p:CollectCoverage=true
       /p:CoverletOutputFormat=cobertura
       /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/
-      
+
+
 - task: DotNetCoreCLI@2
   displayName: 'CodeCoverage Report'
   inputs:
