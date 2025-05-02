@@ -33,17 +33,11 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Unit Tests'
   inputs:
-    command: custom
-    custom: test
+    command: test
     publishTestResults: true
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
-    arguments: >
-      --no-build --configuration ${{ parameters.BUILD_CONFIGURATION }}
-      -- /p:CollectCoverage=true
-      /p:CoverletOutputFormat=cobertura
-      /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/
-
+    arguments: '--configuration ${{ parameters.BUILD_CONFIGURATION }} /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/'
 
 - task: DotNetCoreCLI@2
   displayName: 'CodeCoverage Report'
