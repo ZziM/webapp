@@ -31,7 +31,6 @@ steps:
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
     arguments: >
-      --no-build 
       --configuration $(BUILD_CONFIGURATION)
       /p:CollectCoverage=true 
       /p:CoverletOutputFormat=cobertura 
