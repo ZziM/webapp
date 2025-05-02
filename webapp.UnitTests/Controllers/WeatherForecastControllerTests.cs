@@ -11,19 +11,19 @@ public class WeatherForecastControllerTests
 {
     private WeatherForecastController _controller;
     private ILogger<WeatherForecastController> _loger;
-    
+
     [SetUp]
     public void Setup()
     {
         _loger = new Mock<ILogger<WeatherForecastController>>().Object;
         _controller = new WeatherForecastController(_loger);
     }
-    
+
     [Test]
     public void Get_ReturnsOkResult()
     {
         //Arrange
-        
+
         //Act
         var response = _controller.Get();
 
