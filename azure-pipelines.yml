@@ -21,8 +21,8 @@ steps:
     version: $(DOTNET_SDK_VERSION)
     performMultiLevelLookup: true
 
-- script: dotnet --info
-  displayName: 'Check .NET SDK version used'
+- checkout: self
+  displayName: 'Checkout'
 
 - task: DotNetCoreCLI@2
   displayName: 'Install .NET tools from local manifest'
@@ -30,9 +30,6 @@ steps:
     command: 'custom'
     custom: 'tool'
     arguments: 'restore'
-
-- checkout: self
-  displayName: 'Checkout'
 
 - task: DotNetCoreCLI@2
   displayName: 'Check Format'
