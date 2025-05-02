@@ -38,7 +38,9 @@ steps:
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
     arguments: |
-      --no-build --configuration ${{ parameters.BUILD_CONFIGURATION }}
+      --no-build 
+      --configuration ${{ parameters.BUILD_CONFIGURATION }}
+      --
       /p:CollectCoverage=true 
       /p:CoverletOutputFormat=cobertura 
       /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/
