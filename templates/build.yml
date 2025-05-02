@@ -1,6 +1,8 @@
 parameters:
   BUILD_CONFIGURATION: 'Release'
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+  COVERAGE_DIR: $(Build.SourcesDirectory)/TestResults/Coverage
+  ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
 
 steps:
 - task: Cache@2
@@ -24,38 +26,47 @@ steps:
     projects: '**/*.sln'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Build Solution'
+  inputs:
+    command: build
+    projects: '**/*.sln'
+    arguments: |
+      --configuration $(BUILD_CONFIGURATION)
+
+- task: DotNetCoreCLI@2
   displayName: 'Unit Tests'
   inputs:
     command: test
     publishTestResults: true
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
-    arguments: >
-      --configuration $(BUILD_CONFIGURATION)
+    arguments: |
+      --no-build --configuration $(BUILD_CONFIGURATION)
       /p:CollectCoverage=true 
       /p:CoverletOutputFormat=cobertura 
-      /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/
+      /p:CoverletOutput=$(COVERAGE_DIR)/
 
 - task: DotNetCoreCLI@2
   displayName: 'CodeCoverage Report'
   inputs:
     command: 'custom'
     custom: 'tool'
-    arguments: >
+    arguments: |
       run reportgenerator --
-      -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml
-      -targetdir:$(Build.SourcesDirectory)/TestResults/Coverage/Report
+      -reports:$(COVERAGE_DIR)/coverage.cobertura.xml
+      -targetdir:$(COVERAGE_DIR)/Report
       -reporttypes:HtmlInline_AzurePipelines
 
 - task: PublishCodeCoverageResults@2
   displayName: 'Publish Code Coverage Report'
   inputs:
-    summaryFileLocation: '$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml'
+    summaryFileLocation: '$(COVERAGE_DIR)/coverage.cobertura.xml'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build & Deploy artifact'
   inputs:
     command: publish
     publishWebProjects: true
-    arguments: '--no-restore --configuration $(BUILD_CONFIGURATION) --output $(Build.ArtifactStagingDirectory)'
+    arguments: |
+      --no-restore --configuration $(BUILD_CONFIGURATION) --output $(ARTIFACT_DIR)
     zipAfterPublish: true
