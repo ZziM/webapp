@@ -67,7 +67,7 @@ stages:
           vmImage: 'ubuntu-latest'
         environment: 'development'
         variables:
-        - group: $(variableGroup)
+        - group: 'Release'
         strategy:
           runOnce:
             deploy:
@@ -78,7 +78,7 @@ stages:
                   displayName: 'Deploy to Azure Web App'
                   inputs:
                       azureSubscription: $(azureServiceConnection)
-                      appName: $(WebAppNameStage)
+                      appName: $(WebAppNameDev)
                       appType: 'webApp'
                       package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
 
@@ -93,7 +93,7 @@ stages:
           vmImage: $(vmImage)
         environment: 'stage'
         variables:
-        - group: $(variableGroup)
+        - group: 'Release'
         strategy:
           runOnce:
             deploy:
