@@ -73,7 +73,7 @@ stages:
                 - task: AzureWebApp@1
                   displayName: 'Deploy to Azure Web App'
                   inputs:
-                    azureSubscription: 'Release'
+                    azureSubscription: 'cstadimod-dev-arm-sc'
                     appName: '$(WebAppName)'
                     appType: 'webApp'
                     package: $(ArtifactDir)
