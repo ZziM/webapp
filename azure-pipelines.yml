@@ -1,51 +1,113 @@
 trigger:
-- develop
-- master
+  branches:
+    include:
+      - development
 
-pool:
-  vmImage: 'windows-latest'
+stages:
+  - stage: Build
+    displayName: 'Build'
+    jobs: 
+      - job: BuildJob
+        displayName: 'Build Job'
+        pool:
+          vmImage: 'ubuntu-latest'
 
-variables:
-  BuildConfiguration: 'Release'
-  DotNetSdkVersion: 8.x
-  NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
-  CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
-  ArtifactDir: $(Build.ArtifactStagingDirectory)
+        variables:
+          BuildConfiguration: 'Release'
+          DotNetSdkVersion: 8.x
+          NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
+          CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
+          ArtifactDir: $(Build.ArtifactStagingDirectory)
+          WebAppArtifact: 'WebAppArtifact'
+          azureServiceConnection: 'cstadimod-arm-sc'
+          variableGroup: 'Release'
+          vmImage: 'ubuntu-latest'
 
-steps:
-- task: UseDotNet@2
-  displayName: 'Install .NET SDK'
-  inputs:
-    version: $(DotNetSdkVersion)
-    performMultiLevelLookup: true
+        steps:
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK'
+          inputs:
+            version: $(DotNetSdkVersion)
+            performMultiLevelLookup: true
 
-- checkout: self
-  displayName: 'Checkout Repository'
+        - checkout: self
+          displayName: 'Checkout Repository'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Restore .NET Tools'
-  inputs:
-    command: 'custom'
-    custom: 'tool'
-    arguments: 'restore'
+        - task: DotNetCoreCLI@2
+          displayName: 'Restore .NET Tools'
+          inputs:
+            command: 'custom'
+            custom: 'tool'
+            arguments: 'restore'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Verify Code Formatting'
-  inputs:
-    command: 'custom'
-    custom: 'format'
-    arguments: '--verify-no-changes'
+        - task: DotNetCoreCLI@2
+          displayName: 'Verify Code Formatting'
+          inputs:
+            command: 'custom'
+            custom: 'format'
+            arguments: '--verify-no-changes'
 
-- template: templates/build.yml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
-    NuGetPackages: '$(NuGetPackages)'
-    CoverageDir: '$(CoverageDir)'
-    ArtifactDir: '$(ArtifactDir)'
+        - template: templates/build.yml
+          parameters:
+            BuildConfiguration: '$(BuildConfiguration)'
+            NuGetPackages: '$(NuGetPackages)'
+            CoverageDir: '$(CoverageDir)'
+            ArtifactDir: '$(ArtifactDir)'
 
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish Artifact: WebApp'
-  condition: succeeded()
-  inputs:
-    targetPath: '$(ArtifactDir)'
-    artifact: 'WebAppArtifact'
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish Artifact: WebApp'
+          condition: succeeded()
+          inputs:
+            targetPath: '$(ArtifactDir)'
+            artifact: 'WebAppArtifact'
+
+  - stage: 'Dev'
+    displayName: 'Dev'
+    dependsOn: Build
+    condition: succeeded('Build')
+    jobs:
+      - deployment: DeployWebApp
+        displayName: 'Deploy Web App'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'development'
+        variables:
+        - group: 'Release'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: $(WebAppArtifact)
+                - task: AzureWebApp@1
+                  displayName: 'Deploy to Azure Web App'
+                  inputs:
+                      azureSubscription: 'cstadimod-arm-sc'
+                      appName: $(WebAppNameDev)
+                      appType: 'webApp'
+                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/$(BuildConfiguration)/*.zip' #TODO: better to change ** to specific name
+
+  - stage: 'Staging'
+    displayName: 'Staging'
+    dependsOn: Dev
+    jobs:
+      - deployment: 'DeployWebApp'
+        displayName: 'Deploy Web App'
+        pool:
+          vmImage: $(vmImage)
+        environment: 'stage'
+        variables:
+        - group: 'Release'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: $(WebAppArtifact)
+                - task: AzureWebApp@1
+                  displayName: 'Deploy to Azure Web App'
+                  inputs:
+                      azureSubscription: 'cstadimod-arm-sc'
+                      appName: $(WebAppNameStage)
+                      appType: 'webApp'
+                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/$(BuildConfiguration)/*.zip' #TODO: better to change ** to specific name
