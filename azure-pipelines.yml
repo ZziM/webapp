@@ -76,4 +76,4 @@ stages:
                     azureSubscription: 'cstadimod-dev-arm-sc'
                     appName: '$(WebAppName)'
                     appType: 'webApp'
-                    package: '$(Pipeline.Workspace)/WebAppArtifact/$(buildConfiguration)/*.zip'
+                    package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
