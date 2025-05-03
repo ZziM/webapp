@@ -1,3 +1,8 @@
+trigger:
+  branches:
+    include:
+      - development
+
 stages:
   - stage: Build
     displayName: 'Build'
@@ -80,8 +85,7 @@ stages:
                       azureSubscription: 'cstadimod-arm-sc'
                       appName: $(WebAppNameDev)
                       appType: 'webApp'
-                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
-
+                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/$(BuildConfiguration)/*.zip' #TODO: better to change ** to specific name
 
   - stage: 'Staging'
     displayName: 'Staging'
@@ -106,4 +110,4 @@ stages:
                       azureSubscription: 'cstadimod-arm-sc'
                       appName: $(WebAppNameStage)
                       appType: 'webApp'
-                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
+                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/$(BuildConfiguration)/*.zip' #TODO: better to change ** to specific name
