@@ -55,7 +55,7 @@ stages:
   - stage: Deploy
     displayName: 'Deploy'
     dependsOn: Build
-    condition: successed('Build')
+    condition: succeeded('Build')
     jobs:
       - deployment: DeployWebApp
         displayName: 'Deploy Web App'
