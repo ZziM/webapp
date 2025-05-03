@@ -73,7 +73,7 @@ stages:
                 - task: AzureWebApp@1
                   displayName: 'Deploy to Azure Web App'
                   inputs:
-                    azureSubscription: 'cstadimod-dev-arm-sc'
+                    azureSubscription: 'cstadimod-arm-sc'
                     appName: '$(WebAppName)'
                     appType: 'webApp'
                     package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
