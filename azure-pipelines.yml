@@ -52,8 +52,8 @@ stages:
             targetPath: '$(ArtifactDir)'
             artifact: 'WebAppArtifact'
 
-  - stage: Deploy
-    displayName: 'Deploy'
+  - stage: 'Dev'
+    displayName: 'Dev'
     dependsOn: Build
     condition: succeeded('Build')
     jobs:
@@ -77,3 +77,28 @@ stages:
                     appName: '$(WebAppNameDev)'
                     appType: 'webApp'
                     package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
+
+  - stage: 'Staging'
+    displayName: 'Staging'
+    dependsOn: Dev
+    jobs:
+      - deployment: 'DeployWebApp'
+        displayName: 'Deploy Web App'
+        pool:
+          vmImage: 'ubuntu-latest' #TODO: Move to environment variable
+        environment: 'stage'
+        variables:
+        - group: 'Release'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: WebAppArtifact #TODO: Move to environment variable
+                - task: AzureWebApp@1
+                  displayName: 'Deploy to Azure Web App'
+                  inputs:
+                      azureSubscription: 'cstadimod-arm-sc' #TODO: Move to environment variable
+                      appName: $(WebAppNameStage)
+                      appType: 'webApp'
+                      package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
