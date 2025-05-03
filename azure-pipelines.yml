@@ -13,6 +13,10 @@ stages:
           NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
           CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
           ArtifactDir: $(Build.ArtifactStagingDirectory)
+          WebAppArtifact: 'WebAppArtifact'
+          azureServiceConnection: 'cstadimod-arm-sc'
+          variableGroup: 'Release'
+          vmImage: 'ubuntu-latest'
 
         steps:
         - task: UseDotNet@2
@@ -63,20 +67,21 @@ stages:
           vmImage: 'ubuntu-latest'
         environment: 'development'
         variables:
-        - group: 'Release'
+        - group: $(variableGroup)
         strategy:
           runOnce:
             deploy:
               steps:
                 - download: current
-                  artifact: WebAppArtifact #TODO: Move to environment variable
+                  artifact: $(WebAppArtifact)
                 - task: AzureWebApp@1
                   displayName: 'Deploy to Azure Web App'
                   inputs:
-                    azureSubscription: 'cstadimod-arm-sc'
-                    appName: '$(WebAppNameDev)'
-                    appType: 'webApp'
-                    package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
+                      azureSubscription: $(azureServiceConnection)
+                      appName: $(WebAppNameStage)
+                      appType: 'webApp'
+                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
+
 
   - stage: 'Staging'
     displayName: 'Staging'
@@ -85,20 +90,20 @@ stages:
       - deployment: 'DeployWebApp'
         displayName: 'Deploy Web App'
         pool:
-          vmImage: 'ubuntu-latest' #TODO: Move to environment variable
+          vmImage: $(vmImage)
         environment: 'stage'
         variables:
-        - group: 'Release'
+        - group: $(variableGroup)
         strategy:
           runOnce:
             deploy:
               steps:
                 - download: current
-                  artifact: WebAppArtifact #TODO: Move to environment variable
+                  artifact: $(WebAppArtifact)
                 - task: AzureWebApp@1
                   displayName: 'Deploy to Azure Web App'
                   inputs:
-                      azureSubscription: 'cstadimod-arm-sc' #TODO: Move to environment variable
+                      azureSubscription: $(azureServiceConnection)
                       appName: $(WebAppNameStage)
                       appType: 'webApp'
-                      package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
+                      package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
