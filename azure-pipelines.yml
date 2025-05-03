@@ -63,7 +63,7 @@ stages:
           vmImage: 'ubuntu-latest'
         environment: 'development'
         variables:
-        - group: 'development-variables'
+        - group: 'Release'
         strategy:
           runOnce:
             deploy:
