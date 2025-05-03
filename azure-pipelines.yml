@@ -97,7 +97,7 @@ stages:
   - stage: 'Staging'
     displayName: 'Staging'
     dependsOn: Dev
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/stage'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
     jobs:
       - deployment: 'DeployWebApp'
         displayName: 'Deploy Web App'
