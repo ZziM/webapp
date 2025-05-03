@@ -69,7 +69,7 @@ stages:
   - stage: 'Dev'
     displayName: 'Dev'
     dependsOn: Build
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'refs/heads/development'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
     jobs:
       - deployment: DeployWebApp
         displayName: 'Deploy Web App'
@@ -92,11 +92,10 @@ stages:
                       appType: 'webApp'
                       package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
 
-
   - stage: 'Staging'
     displayName: 'Staging'
     dependsOn: Dev
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'refs/heads/stage'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/stage'))
     jobs:
       - deployment: 'DeployWebApp'
         displayName: 'Deploy Web App'
