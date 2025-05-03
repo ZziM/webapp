@@ -92,7 +92,6 @@ stages:
                       appType: 'webApp'
                       package: '$(Pipeline.Workspace)/$(WebAppArtifact)/**/*.zip' #TODO: better to change ** to specific name
 
-
   - stage: 'Staging'
     displayName: 'Staging'
     dependsOn: Dev
