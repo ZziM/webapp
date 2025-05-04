@@ -73,11 +73,11 @@ stages:
     jobs:
       - template: templates/deploy.yml
         parameters:
-          vmImage: '$(vmImage)'
+          vmImage: ${{ variables.vmImage }}
           artifactName: WebAppArtifact
           environment: 'development'
-          buildConfiguration: '$(BuildConfiguration)'
-          webAppName: $(WebAppNameDevelopment)
+          buildConfiguration: ${{ variables.BuildConfiguration }}
+          webAppName: ${{ variables.WebAppNameDevelopment }}
 
   - stage: 'Staging'
     displayName: 'Staging'
