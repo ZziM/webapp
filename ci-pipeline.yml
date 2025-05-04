@@ -1,10 +1,7 @@
-resources:
-  pipelines:
-    - pipeline:  WebApp-resource
-      source: 'WebApp-CI'
-      trigger:
-        branches:
-          - development
+trigger:
+  branches:
+    include:
+      - development
 
 variables:
   BuildConfiguration: 'Release'
