@@ -8,6 +8,17 @@ pr:
     include:
       - 'development'
 
+variables:
+  BuildConfiguration: 'Release'
+  DotNetSdkVersion: 8.x
+  NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
+  CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
+  ArtifactDir: $(Build.ArtifactStagingDirectory)
+  WebAppArtifact: 'WebAppArtifact'
+  azureServiceConnection: 'cstadimod-arm-sc'
+  variableGroup: 'Release'
+  vmImage: 'ubuntu-latest'
+
 stages:
   - stage: Build
     displayName: 'Build'
@@ -16,18 +27,6 @@ stages:
         displayName: 'Build Job'
         pool:
           vmImage: 'ubuntu-latest'
-
-        variables:
-          BuildConfiguration: 'Release'
-          DotNetSdkVersion: 8.x
-          NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
-          CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
-          ArtifactDir: $(Build.ArtifactStagingDirectory)
-          WebAppArtifact: 'WebAppArtifact'
-          azureServiceConnection: 'cstadimod-arm-sc'
-          variableGroup: 'Release'
-          vmImage: 'ubuntu-latest'
-
         steps:
         - task: UseDotNet@2
           displayName: 'Install .NET SDK'
@@ -73,11 +72,11 @@ stages:
     jobs:
       - template: templates/deploy.yml
         parameters:
-          vmImage: '$(vmImage)'
+          vmImage: ${{ variables.vmImage }}
           artifactName: WebAppArtifact
           environment: 'development'
-          buildConfiguration: '$(BuildConfiguration)'
-          webAppName: $(WebAppNameDevelopment)
+          buildConfiguration: ${{ variables.BuildConfiguration }}
+          webAppName: ${{ variables.WebAppNameDevelopment }}
 
   - stage: 'Staging'
     displayName: 'Staging'

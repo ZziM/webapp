@@ -1,9 +1,18 @@
 parameters:
-  vmImage: 'ubuntu-latest'
-  artifactName: 'WebAppArtifact'
-  environment: ''
-  buildConfiguration: 'Release'
-  webAppName: ''
+  - name: vmImage
+    type: string
+
+  - name: artifactName
+    type: string
+    
+  - name: environment
+    type: string
+
+  - name: buildConfiguration
+    type: string
+
+  - name: webAppName
+    type: string
 
 jobs:
   - deployment: DeployWebApp
