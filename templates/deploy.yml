@@ -34,4 +34,4 @@ jobs:
                   azureSubscription: 'cstadimod-arm-sc'
                   appName: ${{ parameters.webAppName }}
                   appType: 'webApp'
-                  package: '$(Pipeline.Workspace)/WebAppArtifact/${{ parameters.buildConfiguration }}/*.zip' #TODO: better to change ** to specific name
+                  package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
