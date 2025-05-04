@@ -1,0 +1,64 @@
+resources:
+  pipelines:
+    - pipeline:  WebApp-resource
+      source: 'WebApp-CI'
+      trigger:
+        branches:
+          - development
+
+variables:
+  BuildConfiguration: 'Release'
+  DotNetSdkVersion: 8.x
+  NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
+  CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
+  ArtifactDir: $(Build.ArtifactStagingDirectory)
+  WebAppArtifact: 'WebAppArtifact'
+  azureServiceConnection: 'cstadimod-arm-sc'
+  variableGroup: 'Release'
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: Build
+    displayName: 'Build'
+    jobs: 
+      - job: BuildJob
+        displayName: 'Build Job'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK'
+          inputs:
+            version: $(DotNetSdkVersion)
+            performMultiLevelLookup: true
+
+        - checkout: self
+          displayName: 'Checkout Repository'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Restore .NET Tools'
+          inputs:
+            command: 'custom'
+            custom: 'tool'
+            arguments: 'restore'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Verify Code Formatting'
+          inputs:
+            command: 'custom'
+            custom: 'format'
+            arguments: '--verify-no-changes'
+
+        - template: templates/build.yml
+          parameters:
+            BuildConfiguration: '$(BuildConfiguration)'
+            NuGetPackages: '$(NuGetPackages)'
+            CoverageDir: '$(CoverageDir)'
+            ArtifactDir: '$(ArtifactDir)'
+
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish Artifact: WebApp'
+          condition: succeeded()
+          inputs:
+            targetPath: '$(ArtifactDir)'
+            artifact: 'WebAppArtifact'
