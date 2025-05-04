@@ -83,23 +83,10 @@ stages:
     dependsOn: Dev
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
     jobs:
-      - deployment: 'DeployWebApp'
-        displayName: 'Deploy Web App'
-        pool:
-          vmImage: $(vmImage)
-        environment: 'stage'
-        variables:
-        - group: 'Release'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - download: current
-                  artifact: $(WebAppArtifact)
-                - task: AzureWebApp@1
-                  displayName: 'Deploy to Azure Web App'
-                  inputs:
-                      azureSubscription: 'cstadimod-arm-sc'
-                      appName: $(WebAppNameStage)
-                      appType: 'webApp'
-                      package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
+      - template: templates/deploy.yml
+        parameters:
+          vmImage: ${{ variables.vmImage }}
+          artifactName: WebAppArtifact
+          environment: stage
+          buildConfiguration: ${{ variables.BuildConfiguration }}
+          webAppName: $(WebAppNameStage)
