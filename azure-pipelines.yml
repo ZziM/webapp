@@ -70,6 +70,9 @@ stages:
     displayName: 'Dev'
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    jobs:
+      - deployment: DeployWebApp
+        displayName: 'Deploy Web App to Development'
   - template: templates/deploy.yml
     parameters:
       vmImage: '$(vmImage)'
@@ -82,10 +85,13 @@ stages:
     displayName: 'Staging'
     dependsOn: Dev
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
-  - template: templates/deploy.yml
-    parameters:
-      vmImage: '$(vmImage)'
-      artifactName: 'WebAppArtifact'
-      environment: 'development'
-      buildConfiguration: '$(BuildConfiguration)'
-      webAppName: '$(WebAppNameStage)'
+    jobs:
+    - deployment: DeployWebApp
+      displayName: 'Deploy Web App to Staging'
+    - template: templates/deploy.yml
+      parameters:
+        vmImage: '$(vmImage)'
+        artifactName: 'WebAppArtifact'
+        environment: 'development'
+        buildConfiguration: '$(BuildConfiguration)'
+        webAppName: '$(WebAppNameStage)'

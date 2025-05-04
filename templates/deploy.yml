@@ -3,24 +3,21 @@ parameters:
   artifactName: 'WebAppArtifact'
   environment: ''
   buildConfiguration: 'Release'
-  WebAppName: ''
+  webAppName: ''
 
-jobs:
-  - deployment: DeployWebApp
-    displayName: 'Deploy Web App'
-    pool:
-      vmImage: ${{ parameters.vmImage}}
-    environment: ${{ parameters.environment }}
-    strategy:
-      runOnce:
-        deploy:
-        steps:
-          - download: current
-            artifact: ${{ parameters.artifactName }}
-          - task: AzureWebApp@1
-            displayName: 'Deploy to Azure Web App'
-            inputs:
-              azureSubscription: 'cstadimod-arm-sc'
-              appName: ${{ parameters.WebAppName }}
-              appType: 'webApp'
-              package: '$(Pipeline.Workspace)/${{ parameters.artifactName }}/${{ parameters.buildConfiguration }}/*.zip' #TODO: better to change ** to specific name
+pool:
+  vmImage: ${{ parameters.vmImage}}
+environment: ${{ parameters.environment }}
+strategy:
+  runOnce:
+    deploy:
+    steps:
+      - download: current
+        artifact: ${{ parameters.artifactName }}
+      - task: AzureWebApp@1
+        displayName: 'Deploy to Azure Web App'
+        inputs:
+          azureSubscription: 'cstadimod-arm-sc'
+          appName: ${{ parameters.webAppName }}
+          appType: 'webApp'
+          package: '$(Pipeline.Workspace)/${{ parameters.artifactName }}/${{ parameters.buildConfiguration }}/*.zip' #TODO: better to change ** to specific name
