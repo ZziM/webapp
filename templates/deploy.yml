@@ -1,0 +1,28 @@
+parameters:
+  vmImage: 'ubuntu-latest'
+  artifactName: 'WebAppArtifact'
+  environment: ''
+  buildConfiguration: 'Release'
+  webAppName: ''
+
+jobs:
+  - deployment: DeployWebApp
+    displayName: 'Deploy Web App'
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    environment: ${{ parameters.environment }}
+    variables:
+    - group: 'Release'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: current
+              artifact: ${{ parameters.artifactName }}
+            - task: AzureWebApp@1
+              displayName: 'Deploy to Azure Web App'
+              inputs:
+                  azureSubscription: 'cstadimod-arm-sc'
+                  appName: ${{ parameters.webAppName }}
+                  appType: 'webApp'
+                  package: '$(Pipeline.Workspace)/WebAppArtifact/${{ parameters.buildConfiguration }}/*.zip' #TODO: better to change ** to specific name
