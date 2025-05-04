@@ -76,7 +76,7 @@ stages:
           artifactName: WebAppArtifact
           environment: 'development'
           buildConfiguration: ${{ variables.BuildConfiguration }}
-          webAppName: ${{ variables.WebAppNameDevelopment }}
+          webAppName: $(WebAppNameDevelopment)
 
   - stage: 'Staging'
     displayName: 'Staging'
