@@ -71,23 +71,36 @@ stages:
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
     jobs:
-    - template: templates/deploy.yml
-      parameters:
-        vmImage: '$(vmImage)'
-        artifactName: 'WebAppArtifact'
-        environment: 'development'
-        buildConfiguration: '$(BuildConfiguration)'
-        webAppName: '$(WebAppNameDev)'
+      - template: template/deploy.yml
+        parameters:
+          vmImage: '$(vmImage)'
+          artifactName: WebAppArtifact
+          environment: 'development'
+          buildConfiguration: '$(BuildConfiguration)'
+          webAppName: $(WebAppNameDevelopment)
 
   - stage: 'Staging'
     displayName: 'Staging'
     dependsOn: Dev
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
     jobs:
-    - template: templates/deploy.yml
-      parameters:
-        vmImage: '$(vmImage)'
-        artifactName: 'WebAppArtifact'
-        environment: 'development'
-        buildConfiguration: '$(BuildConfiguration)'
-        webAppName: '$(WebAppNameStage)'
+      - deployment: 'DeployWebApp'
+        displayName: 'Deploy Web App'
+        pool:
+          vmImage: $(vmImage)
+        environment: 'stage'
+        variables:
+        - group: 'Release'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: $(WebAppArtifact)
+                - task: AzureWebApp@1
+                  displayName: 'Deploy to Azure Web App'
+                  inputs:
+                      azureSubscription: 'cstadimod-arm-sc'
+                      appName: $(WebAppNameStage)
+                      appType: 'webApp'
+                      package: '$(Pipeline.Workspace)/WebAppArtifact/**/*.zip' #TODO: better to change ** to specific name
