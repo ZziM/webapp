@@ -46,13 +46,65 @@ stages:
             custom: 'format'
             arguments: '--verify-no-changes'
 
-        - template: templates/build.yml
-          parameters:
-            BuildConfiguration: '$(BuildConfiguration)'
-            NuGetPackages: '$(NuGetPackages)'
-            CoverageDir: '$(CoverageDir)'
-            ArtifactDir: '$(ArtifactDir)'
+        - task: Cache@2
+          displayName: 'NuGet Caching'
+          inputs:
+            key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
+            restoreKeys: |
+              nuget | "$(Agent.OS)"
+              nuget
+            path: $(NuGetPackages)
+            cacheHitVar: 'cacheRestored'
 
+        - task: DotNetCoreCLI@2
+          displayName: 'Dotnet Restore'
+          condition: ne($(cacheRestored), true)
+          inputs:
+            command: restore
+            projects: '**/*.sln'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Build Solution'
+          inputs:
+            command: build
+            projects: '**/*.sln'
+            arguments: |
+              --configuration $(BuildConfiguration)
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Unit Tests'
+          inputs:
+            command: test
+            publishTestResults: true
+            testRunTitle: 'Unit Tests'
+            projects: '**/*.UnitTests/*.csproj'
+            arguments: '--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(CoverageDir)/'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'CodeCoverage Report'
+          inputs:
+            command: 'custom'
+            custom: 'tool'
+            arguments: >
+              run reportgenerator
+              -reports:$(CoverageDir)/coverage.cobertura.xml
+              -targetdir:$(CoverageDir)/Report
+              -reporttypes:HtmlInline_AzurePipelines
+
+        - task: PublishCodeCoverageResults@2
+          displayName: 'Publish Code Coverage Report'
+          inputs:
+            summaryFileLocation: '$(CoverageDir)/coverage.cobertura.xml'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Build & Deploy artifact'
+          inputs:
+            command: publish
+            publishWebProjects: true
+            arguments: |
+              --no-restore --configuration $(BuildConfiguration) --output $(ArtifactDir)
+            zipAfterPublish: true
+            
         - task: PublishPipelineArtifact@1
           displayName: 'Publish Artifact: WebApp'
           condition: succeeded()
