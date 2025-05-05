@@ -54,11 +54,11 @@ stages:
               nuget | "$(Agent.OS)"
               nuget
             path: $(NuGetPackages)
-            cacheHitVar: 'cacheRestored'
+            cacheHitVar: 'CACHE_RESTORED'
 
         - task: DotNetCoreCLI@2
           displayName: 'Dotnet Restore'
-          condition: ne($(cacheRestored), true)
+          condition: ne(variables.CACHE_RESTORED, true)
           inputs:
             command: restore
             projects: '**/*.sln'
