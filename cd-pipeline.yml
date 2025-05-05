@@ -1,0 +1,41 @@
+resources:
+  pipelines:
+    - pipeline: ci-pipeline
+
+variables:
+  BuildConfiguration: 'Release'
+  DotNetSdkVersion: 8.x
+  NuGetPackages: $(Pipeline.Workspace)/.nuget/packages
+  CoverageDir: $(Build.SourcesDirectory)/TestResults/Coverage
+  ArtifactDir: $(Build.ArtifactStagingDirectory)
+  WebAppArtifact: 'WebAppArtifact'
+  azureServiceConnection: 'cstadimod-arm-sc'
+  variableGroup: 'Release'
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: 'Dev'
+    displayName: 'Dev'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    jobs:
+      - template: templates/deploy.yml
+        parameters:
+          vmImage: ${{ variables.vmImage }}
+          artifactName: WebAppArtifact
+          environment: 'development'
+          buildConfiguration: ${{ variables.BuildConfiguration }}
+          webAppName: $(WebAppNameDev)
+
+  - stage: 'Staging'
+    displayName: 'Staging'
+    dependsOn: Dev
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    jobs:
+      - template: templates/deploy.yml
+        parameters:
+          vmImage: ${{ variables.vmImage }}
+          artifactName: WebAppArtifact
+          environment: stage
+          buildConfiguration: ${{ variables.BuildConfiguration }}
+          webAppName: $(WebAppNameStage)
