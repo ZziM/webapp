@@ -1,4 +1,4 @@
-parameters:
+variables:
   BUILD_CONFIGURATION: 'Release'
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
   COVERAGE_DIR: $(Build.SourcesDirectory)/TestResults/Coverage
@@ -12,12 +12,12 @@ steps:
     restoreKeys: |
       nuget | "$(Agent.OS)"
       nuget
-    path: '${{ parameters.NUGET_PACKAGES }}'
+    path: $(NUGET_PACKAGES)
     cacheHitVar: 'CACHE_RESTORED'
 
 - task: DotNetCoreCLI@2
   displayName: 'Dotnet Restore'
-  condition: ne(variables.CACHE_RESTORED, true)
+  condition: ne($(CACHE_RESTORED), true)
   inputs:
     command: restore
     projects: '**/*.sln'
@@ -28,7 +28,7 @@ steps:
     command: build
     projects: '**/*.sln'
     arguments: |
-      --configuration ${{ parameters.BUILD_CONFIGURATION }}
+      --configuration $(BUILD_CONFIGURATION)
 
 - task: DotNetCoreCLI@2
   displayName: 'Unit Tests'
@@ -37,7 +37,7 @@ steps:
     publishTestResults: true
     testRunTitle: 'Unit Tests'
     projects: '**/*.UnitTests/*.csproj'
-    arguments: '--configuration ${{ parameters.BUILD_CONFIGURATION }} /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ parameters.COVERAGE_DIR }}/'
+    arguments: '--configuration $(BUILD_CONFIGURATION) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(COVERAGE_DIR)/'
 
 - task: DotNetCoreCLI@2
   displayName: 'CodeCoverage Report'
@@ -46,15 +46,14 @@ steps:
     custom: 'tool'
     arguments: >
       run reportgenerator
-      -reports:${{ parameters.COVERAGE_DIR }}/coverage.cobertura.xml
-      -targetdir:${{ parameters.COVERAGE_DIR }}/Report
+      -reports:$(COVERAGE_DIR)/coverage.cobertura.xml
+      -targetdir:$(COVERAGE_DIR)/Report
       -reporttypes:HtmlInline_AzurePipelines
 
 - task: PublishCodeCoverageResults@2
   displayName: 'Publish Code Coverage Report'
   inputs:
-    summaryFileLocation: '${{ parameters.COVERAGE_DIR }}/coverage.cobertura.xml'
-    reportDirectory: '${{ parameters.COVERAGE_DIR }}/Report'
+    summaryFileLocation: '$(COVERAGE_DIR)/coverage.cobertura.xml'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build & Deploy artifact'
@@ -62,5 +61,5 @@ steps:
     command: publish
     publishWebProjects: true
     arguments: |
-      --no-restore --configuration ${{ parameters.BUILD_CONFIGURATION }} --output ${{ parameters.ARTIFACT_DIR }}
+      --no-restore --configuration $(BUILD_CONFIGURATION) --output $(ARTIFACT_DIR)
     zipAfterPublish: true
